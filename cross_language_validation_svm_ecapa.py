@@ -45,16 +45,16 @@ X_dutch = ds_dutch.iloc[:, 1:192]
 y_dutch = ds_dutch.iloc[:, 193]
 
 # Hyperparameter tuning using GridSearchCV
-param_grid = {'C': [0.1, 1, 10, 100, 1000],
-              'gamma': [1, 0.1, 0.01, 0.001, 0.0001],
-              'kernel': ['rbf']}
+# param_grid = {'C': [0.1, 1, 10, 100, 1000],
+#               'gamma': [1, 0.1, 0.01, 0.001, 0.0001],
+#               'kernel': ['rbf']}
 # create a grid search object
-grid = GridSearchCV(SVC(), param_grid, refit=True, verbose=3)
+# grid = GridSearchCV(SVC(), param_grid, refit=True, verbose=3)
 
-grid.fit(X_hun, y_hun)
-print('accuracy score train', metrics.accuracy_score(grid.predict(X_hun),y_hun))
-print(grid.best_params_)
-print(grid.best_score_)
+# grid.fit(X_hun, y_hun)
+# print('accuracy score train', metrics.accuracy_score(grid.predict(X_hun),y_hun))
+# print(grid.best_params_)
+# print(grid.best_score_)
 svc=SVC(kernel='rbf',C=1,gamma=0.4)
 svc.fit(X_hun,y_hun)
 prediction = svc.predict(X_dutch)

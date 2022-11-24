@@ -1,7 +1,6 @@
 import pandas as pd
 from sklearn import metrics
 from sklearn.metrics import classification_report, confusion_matrix
-from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.svm import SVC
@@ -42,16 +41,25 @@ y_hun = ds_hun.iloc[:, 513]
 X_dutch = ds_dutch.iloc[:, :512]
 y_dutch = ds_dutch.iloc[:, 513]
 
-# Hyperparameter tuning using GridSearchCV
-param_grid = {'C': [0.1, 1, 10, 100, 1000],
-              'gamma': [1, 0.1, 0.01, 0.001, 0.0001],
-              'kernel': ['rbf']}
-# create a grid search object
-grid = GridSearchCV(SVC(), param_grid, refit=True, verbose=3)
-grid.fit(X_hun, y_hun)
-grid_predictions = grid.predict(X_dutch)
+# # Hyperparameter tuning using GridSearchCV
+# param_grid = {'C': [0.1, 1, 10, 100, 1000],
+#               'gamma': [1, 0.1, 0.01, 0.001, 0.0001],
+#               'kernel': ['rbf']}
+# # create a grid search object
+# grid = GridSearchCV(SVC(), param_grid, refit=True, verbose=3)
+# grid.fit(X_hun, y_hun)
+# grid_predictions = grid.predict(X_dutch)
+#
+# # print the results
+# print(confusion_matrix(y_dutch, grid_predictions))
+# print(classification_report(y_dutch, grid_predictions))
+# print("Accuracy:", metrics.accuracy_score(y_dutch, grid_predictions))
 
+svc = SVC(kernel='rbf', C=1, gamma=0.4)
+svc.fit(X_hun, y_hun)
+prediction = svc.predict(X_dutch)
 # print the results
-print(confusion_matrix(y_dutch, grid_predictions))
-print(classification_report(y_dutch, grid_predictions))
-print("Accuracy:", metrics.accuracy_score(y_dutch, grid_predictions))
+
+print(confusion_matrix(y_dutch, prediction))
+print(classification_report(y_dutch, prediction))
+print("Accuracy:", metrics.accuracy_score(y_dutch, prediction))
