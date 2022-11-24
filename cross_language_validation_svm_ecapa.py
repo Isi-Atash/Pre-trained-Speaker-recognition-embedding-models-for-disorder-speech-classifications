@@ -1,7 +1,6 @@
 import pandas as pd
 from sklearn import metrics
 from sklearn.metrics import classification_report, confusion_matrix
-from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.svm import SVC
@@ -10,7 +9,6 @@ from sklearn.svm import SVC
 # 2 datasets, 1 for Hungary, 1 for Dutch
 ds_org_hun = pd.read_csv('Ecapa_embedding_hun.csv')
 ds_org_dutch = pd.read_csv('Ecapa_embedding_dutch.csv')
-
 
 # # Normalize the data
 # # 1st, we need to save only OD and HC labels from the dataset
@@ -55,15 +53,19 @@ y_dutch = ds_dutch.iloc[:, 193]
 # print('accuracy score train', metrics.accuracy_score(grid.predict(X_hun),y_hun))
 # print(grid.best_params_)
 # print(grid.best_score_)
-svc=SVC(kernel='rbf',C=1,gamma=0.4)
-svc.fit(X_hun,y_hun)
+
+svc = SVC(kernel='rbf', C=1, gamma=0.4)
+svc.fit(X_hun, y_hun)
 prediction = svc.predict(X_dutch)
+
 # print the results
+# from sklearn.model_selection import cross_val_score
+# prediction = cross_val_score(SVC(kernel='rbf', C=1, gamma=0.4), X_hun, y_hun, cv=10)
+# prediction = prediction.mean()
 
 print(confusion_matrix(y_dutch, prediction))
 print(classification_report(y_dutch, prediction))
 print("Accuracy:", metrics.accuracy_score(y_dutch, prediction))
-
 
 # from sklearn import svm
 # clf = svm.SVC(kernel = 'linear')
