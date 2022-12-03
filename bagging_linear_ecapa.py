@@ -33,7 +33,7 @@ y = pd.concat([y_hun, y_dutch])
 from sklearn.model_selection import cross_val_score
 from sklearn.linear_model import LinearRegression
 
-scores_H = cross_val_score(LinearRegression(), X_hun, y_hun, cv=10)
+scores_H = - cross_val_score(LinearRegression(), X_hun, y_hun, cv=10, scoring='neg_root_mean_squared_error')
 print('SVC H Accuracy: %0.2f (+/- %0.2f)' % (scores_H.mean(), scores_H.std() * 2))
 
 scores_D = cross_val_score(LinearRegression(), X_dutch, y_dutch, cv=10)
