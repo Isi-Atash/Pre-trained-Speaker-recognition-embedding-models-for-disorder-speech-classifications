@@ -36,30 +36,50 @@ ds_hun = pd.DataFrame(ds_hun)
 ds_dutch = pd.DataFrame(ds_dutch)
 
 # split the data to X and y
-X_hun = ds_hun.iloc[:, :512]
+X_hun = ds_hun.iloc[:, 1:512]
 y_hun = ds_hun.iloc[:, 513]
-X_dutch = ds_dutch.iloc[:, :512]
+X_dutch = ds_dutch.iloc[:, 1:512]
 y_dutch = ds_dutch.iloc[:, 513]
+X = pd.concat([X_hun, X_dutch])
+y = pd.concat([y_hun, y_dutch])
 
-# # Hyperparameter tuning using GridSearchCV
-# param_grid = {'C': [0.1, 1, 10, 100, 1000],
-#               'gamma': [1, 0.1, 0.01, 0.001, 0.0001],
-#               'kernel': ['rbf']}
-# # create a grid search object
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.8, random_state=0)
+
+svc = SVC(kernel='rbf', C=10, gamma=0.01)
+svc.fit(X_dutch, y_dutch)
+prediction = svc.predict(X_hun)
+
+# confusion matrix
+cm = confusion_matrix(y_hun, prediction)
+# accuracy score round to 2 decimals
+acc = round(metrics.accuracy_score(y_hun, prediction), 2)
+print('Accuracy:', acc)
+# sensitivity round to 2 decimals
+sens = round(cm[0, 0] / (cm[0, 0] + cm[0, 1]), 2)
+print('Sensitivity:', sens)
+# specificity round to 2 decimals
+spec = round(cm[1, 1] / (cm[1, 0] + cm[1, 1]), 2)
+print('Specificity:', spec)
+# f1 score round to 2 decimals
+f1 = round(metrics.f1_score(y_hun, prediction), 2)
+print('F1 score:', f1)
+
+# grid search
+# from sklearn.model_selection import GridSearchCV
+# param_grid = {'C': [0.1, 1, 10, 100, 1000], 'gamma': [1, 0.1, 0.4, 0.01, 0.001, 0.0001], 'kernel': ['rbf']}
 # grid = GridSearchCV(SVC(), param_grid, refit=True, verbose=3)
-# grid.fit(X_hun, y_hun)
-# grid_predictions = grid.predict(X_dutch)
+# grid.fit(X_dutch, y_dutch)
+# grid_predictions = grid.predict(X_hun)
+# print("Accuracy:", metrics.accuracy_score(y_hun, grid_predictions))
+# # print(confusion_matrix(y_dutch, grid_predictions))
+# # print(classification_report(y_dutch, grid_predictions))
 #
-# # print the results
-# print(confusion_matrix(y_dutch, grid_predictions))
-# print(classification_report(y_dutch, grid_predictions))
-# print("Accuracy:", metrics.accuracy_score(y_dutch, grid_predictions))
-
-svc = SVC(kernel='rbf', C=1, gamma=0.4)
-svc.fit(X_hun, y_hun)
-prediction = svc.predict(X_dutch)
-# print the results
-
-print(confusion_matrix(y_dutch, prediction))
-print(classification_report(y_dutch, prediction))
-print("Accuracy:", metrics.accuracy_score(y_dutch, prediction))
+# # print the best parameters
+# print(grid.best_params_)
+# # print the best estimator
+# print(grid.best_estimator_)
+# # print the best score
+# print(grid.best_score_)
+# #

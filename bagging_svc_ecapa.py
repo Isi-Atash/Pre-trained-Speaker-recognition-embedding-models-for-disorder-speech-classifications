@@ -35,15 +35,15 @@ X = pd.concat([X_hun, X_dutch])
 y = pd.concat([y_hun, y_dutch])
 
 from sklearn.model_selection import cross_val_score
-
-scores_H = cross_val_score(SVC(kernel='rbf', C=1, gamma=0.4), X_hun, y_hun, cv=10)
-print('SVC H Accuracy: %0.2f (+/- %0.2f)' % (scores_H.mean(), scores_H.std() * 2))
-
-scores_D = cross_val_score(SVC(kernel='rbf', C=1, gamma=0.4), X_dutch, y_dutch, cv=10)
-print('SVC D Accuracy: %0.2f (+/- %0.2f)' % (scores_D.mean(), scores_D.std() * 2))
-
-scores_H_D = cross_val_score(SVC(kernel='rbf', C=1, gamma=0.4), X, y, cv=10)
-print('SVC H+D Accuracy: %0.2f (+/- %0.2f)' % (scores_H_D.mean(), scores_H_D.std() * 2))
+#
+# scores_H = cross_val_score(SVC(kernel='rbf', C=1, gamma=0.4), X_hun, y_hun, cv=10)
+# print('SVC H Accuracy: %0.2f (+/- %0.2f)' % (scores_H.mean(), scores_H.std() * 2))
+#
+# scores_D = cross_val_score(SVC(kernel='rbf', C=1, gamma=0.4), X_dutch, y_dutch, cv=10)
+# print('SVC D Accuracy: %0.2f (+/- %0.2f)' % (scores_D.mean(), scores_D.std() * 2))
+#
+# scores_H_D = cross_val_score(SVC(kernel='rbf', C=1, gamma=0.4), X, y, cv=10)
+# print('SVC H+D Accuracy: %0.2f (+/- %0.2f)' % (scores_H_D.mean(), scores_H_D.std() * 2))
 
 # svc = SVC(kernel='rbf', C=1, gamma=0.4)
 # svc.fit(X_hun, y_hun)
@@ -57,18 +57,9 @@ bag_model = BaggingClassifier(base_estimator=SVC(kernel='rbf', C=1, gamma=0.4),
                               bootstrap=True,
                               oob_score=True)
 bag_model.fit(X_hun, y_hun)
-print('H Bagging score: ', bag_model.score(X_hun, y_hun))
+# print('H Bagging score: ', bag_model.score(X_hun, y_hun))
 print('D Bagging score: ', bag_model.score(X_dutch, y_dutch))
-print('H+D Bagging score: ', bag_model.score(X, y))
-print('OOB score: ', bag_model.oob_score_)
-print('OOB accuracy: ', bag_model.oob_score_ * 100)
+# print('H+D Bagging score: ', bag_model.score(X, y))
+# print('OOB score: ', bag_model.oob_score_)
+# print('OOB accuracy: ', bag_model.oob_score_ * 100)
 
-# cross validation
-scores = cross_val_score(bag_model, X_hun, y_hun, cv=10)
-print('Cross_val H Bagging Accuracy: %0.2f (+/- %0.2f)' % (scores.mean(), scores.std() * 2))
-
-scores = cross_val_score(bag_model, X_dutch, y_dutch, cv=10)
-print('Cross_val D Bagging Accuracy: %0.2f (+/- %0.2f)' % (scores.mean(), scores.std() * 2))
-
-scores = cross_val_score(bag_model, X, y, cv=10)
-print('Cross_val H+D Bagging Accuracy: %0.2f (+/- %0.2f)' % (scores.mean(), scores.std() * 2))

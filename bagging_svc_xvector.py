@@ -1,4 +1,5 @@
 import pandas as pd
+from sklearn import metrics
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.svm import SVC
@@ -29,46 +30,38 @@ X_hun = ds_hun.iloc[:, :512]
 y_hun = ds_hun.iloc[:, 513]
 X_dutch = ds_dutch.iloc[:, :512]
 y_dutch = ds_dutch.iloc[:, 513]
-
-
-# merge the datasets
 X = pd.concat([X_hun, X_dutch])
 y = pd.concat([y_hun, y_dutch])
 
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.8, random_state=0)
+
 from sklearn.model_selection import cross_val_score
-
-scores_H = cross_val_score(SVC(kernel='rbf', C=1, gamma=0.4), X_hun, y_hun, cv=10)
-print('SVC H Accuracy: %0.2f (+/- %0.2f)' % (scores_H.mean(), scores_H.std() * 2))
-
-scores_D = cross_val_score(SVC(kernel='rbf', C=1, gamma=0.4), X_dutch, y_dutch, cv=10)
-print('SVC D Accuracy: %0.2f (+/- %0.2f)' % (scores_D.mean(), scores_D.std() * 2))
-
-scores_H_D = cross_val_score(SVC(kernel='rbf', C=1, gamma=0.4), X, y, cv=10)
-print('SVC H+D Accuracy: %0.2f (+/- %0.2f)' % (scores_H_D.mean(), scores_H_D.std() * 2))
-
-# svc = SVC(kernel='rbf', C=1, gamma=0.4)
-# svc.fit(X_hun, y_hun)
-# prediction = svc.predict(X_dutch)
-
 from sklearn.ensemble import BaggingClassifier
 
-bag_model = BaggingClassifier(base_estimator=SVC(kernel='rbf', C=1, gamma=0.4),
+bag_model = BaggingClassifier(base_estimator=SVC(kernel='rbf', C=10, gamma=0.1),
                               n_estimators=100,
-                              max_samples=0.8,
-                              oob_score=True)
-bag_model.fit(X_hun, y_hun)
-print('H Bagging score: ', bag_model.score(X_hun, y_hun))
-print('D Bagging score: ', bag_model.score(X_dutch, y_dutch))
-print('H+D Bagging score: ', bag_model.score(X, y))
-print('OOB score: ', bag_model.oob_score_)
-print('OOB accuracy: ', bag_model.oob_score_ * 100)
+                              random_state=0,
+                              max_samples=0.8)
 
-# cross validation
-scores = cross_val_score(bag_model, X_hun, y_hun, cv=10)
-print('Cross_val H Bagging Accuracy: %0.2f (+/- %0.2f)' % (scores.mean(), scores.std() * 2))
+bag_model.fit(X_train, y_train)
 
-scores = cross_val_score(bag_model, X_dutch, y_dutch, cv=10)
-print('Cross_val D Bagging Accuracy: %0.2f (+/- %0.2f)' % (scores.mean(), scores.std() * 2))
+# prediction ccuracy
+from sklearn.metrics import accuracy_score, confusion_matrix
 
-scores = cross_val_score(bag_model, X, y, cv=10)
-print('Cross_val H+D Bagging Accuracy: %0.2f (+/- %0.2f)' % (scores.mean(), scores.std() * 2))
+prediction = bag_model.predict(X_test)
+test = y_test
+# confusion matrix
+cm = confusion_matrix(test, prediction)
+# accuracy score round to 2 decimals
+acc = round(metrics.accuracy_score(test, prediction), 2)
+print('Accuracy:', acc)
+# sensitivity round to 2 decimals
+sens = round(cm[0, 0] / (cm[0, 0] + cm[0, 1]), 2)
+print('Sensitivity:', sens)
+# specificity round to 2 decimals
+spec = round(cm[1, 1] / (cm[1, 0] + cm[1, 1]), 2)
+print('Specificity:', spec)
+# f1 score round to 2 decimals
+f1 = round(metrics.f1_score(test, prediction), 2)
+print('F1 score:', f1)

@@ -41,34 +41,47 @@ X_hun = ds_hun.iloc[:, 1:192]
 y_hun = ds_hun.iloc[:, 193]
 X_dutch = ds_dutch.iloc[:, 1:192]
 y_dutch = ds_dutch.iloc[:, 193]
+X = pd.concat([X_hun, X_dutch])
+y = pd.concat([y_hun, y_dutch])
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test= train_test_split(X, y, test_size= 0.8, random_state=0)
 
-# Hyperparameter tuning using GridSearchCV
-# param_grid = {'C': [0.1, 1, 10, 100, 1000],
-#               'gamma': [1, 0.1, 0.01, 0.001, 0.0001],
-#               'kernel': ['rbf']}
-# create a grid search object
+# from sklearn.model_selection import GridSearchCV
+# param_grid = {'C': [0.1, 1, 10, 100, 1000], 'gamma': [1, 0.1,0.4, 0.01, 0.001, 0.0001], 'kernel': ['rbf']}
 # grid = GridSearchCV(SVC(), param_grid, refit=True, verbose=3)
-
-# grid.fit(X_hun, y_hun)
-# print('accuracy score train', metrics.accuracy_score(grid.predict(X_hun),y_hun))
+# grid.fit(X_dutch, y_dutch)
+# grid_predictions = grid.predict(X_hun)
+# print("Accuracy:", metrics.accuracy_score(y_hun, grid_predictions))
+# # print the best parameters
 # print(grid.best_params_)
+# # print the best estimator
+# print(grid.best_estimator_)
+# # print the best score
 # print(grid.best_score_)
+# # classification report
+# # print(classification_report(y_hun, grid_predictions))
 
-svc = SVC(kernel='rbf', C=1, gamma=0.4)
-svc.fit(X_hun, y_hun)
-prediction = svc.predict(X_dutch)
 
-# print the results
-# from sklearn.model_selection import cross_val_score
-# prediction = cross_val_score(SVC(kernel='rbf', C=1, gamma=0.4), X_hun, y_hun, cv=10)
-# prediction = prediction.mean()
+# 1, 0.1 (0.4)
 
-print(confusion_matrix(y_dutch, prediction))
-print(classification_report(y_dutch, prediction))
-print("Accuracy:", metrics.accuracy_score(y_dutch, prediction))
 
-# from sklearn import svm
-# clf = svm.SVC(kernel = 'linear')
-# clf.fit(X_hun, y_hun)
-# y_pred = clf.predict(X_dutch)
-# print("Accuracy:",metrics.accuracy_score(y_dutch, y_pred))
+
+
+svc = SVC(kernel='rbf', C=1000, gamma=0.001)
+svc.fit(X_train, y_train)
+prediction = svc.predict(X_test)
+
+#confusion matrix
+cm = confusion_matrix(y_test, prediction)
+#acurracy score round to 2 decimals
+acc = round(metrics.accuracy_score(y_test, prediction), 2)
+print('Accuracy:', acc)
+#senstivity round to 2 decimals
+sens = round(cm[0, 0] / (cm[0, 0] + cm[0, 1]), 2)
+print('Sensitivity:', sens)
+#specificity round to 2 decimals
+spec = round(cm[1, 1] / (cm[1, 0] + cm[1, 1]), 2)
+print('Specificity:', spec)
+#f1 score round to 2 decimals
+f1 = round(metrics.f1_score(y_test, prediction), 2)
+print('F1 score:', f1)
