@@ -1,5 +1,4 @@
 import pandas as pd
-from sklearn import metrics
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.svm import SVC
@@ -47,14 +46,14 @@ bag_model = BaggingClassifier(base_estimator= SVC(kernel='rbf', C=1000, gamma=0.
 bag_model.fit(X_dutch, y_dutch)
 
 # prediction accuracy
-from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.metrics import accuracy_score, confusion_matrix, f1_score
 
 prediction = bag_model.predict(X_hun)
 test = y_hun
 # confusion matrix
 cm = confusion_matrix(test, prediction)
 # accuracy score round to 2 decimals
-acc = round(metrics.accuracy_score(test, prediction), 2)
+acc = round(accuracy_score(test, prediction), 2)
 print('Accuracy:', acc)
 # sensitivity round to 2 decimals
 sens = round(cm[0, 0] / (cm[0, 0] + cm[0, 1]), 2)
@@ -63,5 +62,5 @@ print('Sensitivity:', sens)
 spec = round(cm[1, 1] / (cm[1, 0] + cm[1, 1]), 2)
 print('Specificity:', spec)
 # f1 score round to 2 decimals
-f1 = round(metrics.f1_score(test, prediction), 2)
+f1 = round(f1_score(test, prediction), 2)
 print('F1 score:', f1)
