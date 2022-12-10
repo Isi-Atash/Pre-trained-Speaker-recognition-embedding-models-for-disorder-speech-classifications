@@ -24,17 +24,35 @@ X_hun = ds_hun.iloc[:, 1:192]
 y_hun = ds_hun.iloc[:, 193]
 X_dutch = ds_dutch.iloc[:, 1:192]
 y_dutch = ds_dutch.iloc[:, 193]
+X = pd.concat([X_hun, X_dutch])
+y = pd.concat([y_hun, y_dutch])
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test= train_test_split(X, y, test_size= 0.8, random_state=0)
 
 # Linear regression grade prediction
-model = LinearRegression().fit(X_hun, y_hun)
-# y_pred = model.predict(X_dutch)
+from sklearn.linear_model import LinearRegression
 
-# The coefficients
-print('Coefficients: \n', model.coef_)
+model = LinearRegression().fit(X_dutch, y_dutch)
 
-print(f"intercept: {model.intercept_}")
-print('Coefficient of determination: %.2f'
-      % model.score(X_hun, y_hun))
+#root_mean_squared_error round to 2 decimals
+from sklearn.metrics import mean_squared_error
+from math import sqrt
 
+rms = sqrt(mean_squared_error(y_hun, model.predict(X_hun)))
+print("Root mean squared error: ", round(rms, 2))
+
+#spearman correlation round to 2 decimals
+from scipy.stats import spearmanr
+
+corr, _ = spearmanr(y_hun, model.predict(X_hun))
+
+print("Spearman correlation: ", round(corr, 4))
+
+#pearson correlation round to 2 decimals
+from scipy.stats import pearsonr
+
+corr, _ = pearsonr(y_hun, model.predict(X_hun))
+
+print("Pearson correlation: ", round(corr, 4))
 
 

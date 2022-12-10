@@ -28,39 +28,39 @@ y_hun = ds_hun.iloc[:, 513]
 X_dutch = ds_dutch.iloc[:, :512]
 y_dutch = ds_dutch.iloc[:, 513]
 
-# merge the datasets
 X = pd.concat([X_hun, X_dutch])
 y = pd.concat([y_hun, y_dutch])
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test= train_test_split(X, y, test_size= 0.8, random_state=0)
 
 
-scores_H = cross_val_score(LinearRegression(), X_hun, y_hun, cv=10)
-print('Linear Regression H Accuracy: %0.2f (+/- %0.2f)' % (scores_H.mean(), scores_H.std() * 2))
-
-scores_D = cross_val_score(LinearRegression(), X_dutch, y_dutch, cv=10)
-print('Linear Regression D Accuracy: %0.2f (+/- %0.2f)' % (scores_D.mean(), scores_D.std() * 2))
-
-scores_H_D = cross_val_score(LinearRegression(), X, y, cv=10)
-print('Linear Regression H+D Accuracy: %0.2f (+/- %0.2f)' % (scores_H_D.mean(), scores_H_D.std() * 2))
-
+from sklearn.model_selection import cross_val_score
+from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import BaggingRegressor
 
 bag_model = BaggingRegressor(LinearRegression(),
                               n_estimators=100,
                               max_samples=0.8,
                               bootstrap=True,
-                              oob_score=True)
-bag_model.fit(X_hun, y_hun)
-print('H Bagging score: ', bag_model.score(X_hun, y_hun))
-print('D Bagging score: ', bag_model.score(X_dutch, y_dutch))
-print('H+D Bagging score: ', bag_model.score(X, y))
-print('OOB score: ', bag_model.oob_score_)
-print('OOB accuracy: ', bag_model.oob_score_ * 100)
-#
-# cross validation
-scores = cross_val_score(bag_model, X_hun, y_hun, cv=10)
-print('Cross_val H Bagging Accuracy: %0.2f (+/- %0.2f)' % (scores.mean(), scores.std() * 2))
+                              oob_score=True).fit(X_dutch,y_dutch)
 
-scores = cross_val_score(bag_model, X_dutch, y_dutch, cv=10)
-print('Cross_val D Bagging Accuracy: %0.2f (+/- %0.2f)' % (scores.mean(), scores.std() * 2))
+#root_mean_squared_error round to 2 decimals
+from sklearn.metrics import mean_squared_error
+from math import sqrt
 
-scores = cross_val_score(bag_model, X, y, cv=10)
-print('Cross_val H+D Bagging Accuracy: %0.2f (+/- %0.2f)' % (scores.mean(), scores.std() * 2))
+rms = sqrt(mean_squared_error(y_hun, bag_model.predict(X_hun)))
+print("Root mean squared error: ", round(rms, 2))
+
+#spearman correlation round to 2 decimals
+from scipy.stats import spearmanr
+
+corr, _ = spearmanr(y_hun, bag_model.predict(X_hun))
+
+print("Spearman correlation: ", round(corr, 4))
+
+#pearson correlation round to 2 decimals
+from scipy.stats import pearsonr
+
+corr, _ = pearsonr(y_hun, bag_model.predict(X_hun))
+
+print("Pearson correlation: ", round(corr, 4))
