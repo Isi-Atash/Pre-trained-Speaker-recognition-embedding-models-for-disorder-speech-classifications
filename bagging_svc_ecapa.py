@@ -1,4 +1,7 @@
+import numpy as np
 import pandas as pd
+from sklearn import metrics
+from sklearn.metrics import confusion_matrix
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.svm import SVC
@@ -33,34 +36,50 @@ X = pd.concat([X_hun, X_dutch])
 y = pd.concat([y_hun, y_dutch])
 
 from sklearn.model_selection import train_test_split
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.8, random_state=0)
 
-from sklearn.model_selection import cross_val_score
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.8, random_state=0)
+# M-H-D
+train_x = X_dutch
+train_y = y_dutch
+test_x = X_hun
+test_y = y_hun
+
+from sklearn.model_selection import GridSearchCV
+C_range = np.logspace(-2, 2, 50)
+gamma_range = np.logspace(-9, 3, 50)
+param_grid = {'C': C_range, 'gamma': gamma_range, 'kernel': ['rbf']}
+grid = GridSearchCV(SVC(), param_grid, refit=True, verbose=3)
+grid.fit(train_x, train_y)
+grid_predictions = grid.predict(test_x)
+print("Accuracy:", metrics.accuracy_score(test_y, grid_predictions))
+# print the best parameters
+print(grid.best_params_)
+# print the best estimator
+print(grid.best_estimator_)
+# print the best score
+print(grid.best_score_)
+
+#use the best parameters
 from sklearn.ensemble import BaggingClassifier
 
-bag_model = BaggingClassifier(base_estimator= SVC(kernel='rbf', C=1000, gamma=0.001),
+bag_model = BaggingClassifier(base_estimator=SVC(kernel='rbf', C=grid.best_estimator_.C, gamma=grid.best_estimator_.gamma),
                               n_estimators=100,
                               random_state=0,
-                              max_samples=0.8)
+                              max_samples=0.8).fit(train_x, train_y)
 
-bag_model.fit(X_dutch, y_dutch)
+prediction = bag_model.predict(test_x)
 
-# prediction accuracy
-from sklearn.metrics import accuracy_score, confusion_matrix, f1_score
-
-prediction = bag_model.predict(X_hun)
-test = y_hun
-# confusion matrix
-cm = confusion_matrix(test, prediction)
-# accuracy score round to 2 decimals
-acc = round(accuracy_score(test, prediction), 2)
+#confusion matrix
+cm = confusion_matrix(test_y, prediction)
+#acurracy score round to 2 decimals
+acc = round(metrics.accuracy_score(test_y, prediction), 2)
 print('Accuracy:', acc)
-# sensitivity round to 2 decimals
+#senstivity round to 2 decimals
 sens = round(cm[0, 0] / (cm[0, 0] + cm[0, 1]), 2)
 print('Sensitivity:', sens)
-# specificity round to 2 decimals
+#specificity round to 2 decimals
 spec = round(cm[1, 1] / (cm[1, 0] + cm[1, 1]), 2)
 print('Specificity:', spec)
-# f1 score round to 2 decimals
-f1 = round(f1_score(test, prediction), 2)
+#f1 score round to 2 decimals
+f1 = round(metrics.f1_score(test_y, prediction), 2)
 print('F1 score:', f1)
