@@ -5,6 +5,10 @@ from sklearn.metrics import confusion_matrix
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.svm import SVC
+from sklearn.ensemble import BaggingClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.model_selection import GridSearchCV
+
 
 ds_org_hun = pd.read_csv('Ecapa_embedding_hun.csv')
 ds_org_dutch = pd.read_csv('Ecapa_embedding_dutch.csv')
@@ -35,7 +39,6 @@ y_dutch = ds_dutch.iloc[:, 193]
 X = pd.concat([X_hun, X_dutch])
 y = pd.concat([y_hun, y_dutch])
 
-from sklearn.model_selection import train_test_split
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.8, random_state=0)
 # M-H-D
@@ -44,7 +47,6 @@ train_y = y_dutch
 test_x = X_hun
 test_y = y_hun
 
-from sklearn.model_selection import GridSearchCV
 C_range = np.logspace(-2, 2, 50)
 gamma_range = np.logspace(-9, 3, 50)
 param_grid = {'C': C_range, 'gamma': gamma_range, 'kernel': ['rbf']}
@@ -60,7 +62,6 @@ print(grid.best_estimator_)
 print(grid.best_score_)
 
 #use the best parameters
-from sklearn.ensemble import BaggingClassifier
 
 bag_model = BaggingClassifier(base_estimator=SVC(kernel='rbf', C=grid.best_estimator_.C, gamma=grid.best_estimator_.gamma),
                               n_estimators=100,
